@@ -35,14 +35,6 @@ else
     brew install sox
 fi
 
-# Install Ollama (for clean mode)
-if command -v ollama &>/dev/null; then
-    echo "✅ Ollama already installed"
-else
-    echo "📦 Installing Ollama..."
-    brew install ollama
-fi
-
 # Download Whisper model
 MODELS_DIR=~/whisper-models
 MODEL_FILE="$MODELS_DIR/ggml-base.en.bin"
@@ -56,19 +48,15 @@ else
         "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin"
 fi
 
-# Pull Gemma model for Ollama
-echo "📦 Pulling Gemma model for clean mode (this may take a few minutes)..."
-ollama pull gemma3:4b
-
 # Get the directory where this script lives
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Copy scripts to home directory
 echo "📦 Installing dictation scripts..."
 cp "$SCRIPT_DIR/dictate.sh" ~/dictate.sh
-cp "$SCRIPT_DIR/dictate-clean.sh" ~/dictate-clean.sh
+cp "$SCRIPT_DIR/dictate-clipboard.sh" ~/dictate-clipboard.sh
 chmod +x ~/dictate.sh
-chmod +x ~/dictate-clean.sh
+chmod +x ~/dictate-clipboard.sh
 
 echo ""
 echo "========================================"
@@ -76,29 +64,40 @@ echo "  ✅ Installation Complete!"
 echo "========================================"
 echo ""
 echo "Scripts installed to:"
-echo "  ~/dictate.sh        (raw mode)"
-echo "  ~/dictate-clean.sh  (clean mode)"
+echo "  ~/dictate.sh            (raw mode — types exactly what you say)"
+echo "  ~/dictate-clipboard.sh  (clipboard mode — for use with Apple Intelligence)"
 echo ""
 echo "NEXT STEPS — Create two macOS Shortcuts:"
 echo ""
-echo "1. Open the Shortcuts app"
-echo "2. Create a new shortcut for RAW dictation:"
-echo "   • Add action: 'Run Shell Script'"
-echo "   • Set shell to: /bin/zsh"
-echo "   • Script: ~/dictate.sh"
-echo "   • Click ⓘ → Enable 'Use as Quick Action'"
-echo "   • Assign keyboard shortcut: Control + \`"
+echo "  SHORTCUT 1: Raw Dictation"
+echo "  ─────────────────────────"
+echo "  1. Open the Shortcuts app"
+echo "  2. Create a new shortcut"
+echo "  3. Add action: 'Run Shell Script'"
+echo "  4. Set shell to: /bin/zsh"
+echo "  5. Script: /Users/$(whoami)/dictate.sh"
+echo "  6. Click ⓘ → Enable 'Use as Quick Action'"
+echo "  7. Assign keyboard shortcut: Control + \`"
 echo ""
-echo "3. Create a new shortcut for CLEAN dictation:"
-echo "   • Add action: 'Run Shell Script'"
-echo "   • Set shell to: /bin/zsh"
-echo "   • Script: ~/dictate-clean.sh"
-echo "   • Click ⓘ → Enable 'Use as Quick Action'"
-echo "   • Assign keyboard shortcut: Control + Shift + \`"
+echo "  SHORTCUT 2: Clean Dictation (with Apple Intelligence)"
+echo "  ─────────────────────────────────────────────────────"
+echo "  1. Create a new shortcut"
+echo "  2. Add action: 'Run Shell Script'"
+echo "  3. Set shell to: /bin/zsh"
+echo "  4. Script: /Users/$(whoami)/dictate-clipboard.sh"
+echo "  5. Add action: 'Get Clipboard'"
+echo "  6. Add action: 'Use Model' → select 'On-Device'"
+echo "  7. Set the prompt to:"
+echo "     Clean up this spoken text. Fix grammar, remove filler"
+echo "     words, and make it concise. Do not change the meaning."
+echo "     Return only the cleaned text."
+echo "  8. Add action: 'Copy to Clipboard'"
+echo "  9. Add action: 'Paste'"
+echo "  10. Click ⓘ → Enable 'Use as Quick Action'"
+echo "  11. Assign a keyboard shortcut (e.g., F6)"
 echo ""
-echo "4. Grant permissions (System Settings → Privacy & Security):"
-echo "   • Accessibility: Terminal, Shortcuts"
-echo "   • Microphone: Terminal, Shortcuts"
-echo ""
-echo "5. Test it! Click into any text field and press Control + \`"
+echo "  PERMISSIONS (one-time):"
+echo "  System Settings → Privacy & Security"
+echo "  • Accessibility: Terminal, Shortcuts"
+echo "  • Microphone: Terminal, Shortcuts"
 echo ""
