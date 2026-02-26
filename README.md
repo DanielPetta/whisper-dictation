@@ -39,32 +39,65 @@ The setup script installs:
 - `sox` — audio recording
 - Whisper `base.en` model (~150MB download)
 
+It also copies two scripts to your home directory:
+- `/Users/YOUR_USERNAME/dictate.sh`
+- `/Users/YOUR_USERNAME/dictate-clipboard.sh`
+
 ## Setting Up Keyboard Shortcuts
 
-After running the setup script, create two shortcuts in the macOS **Shortcuts** app.
+After running the setup script, you need to create shortcuts in the macOS **Shortcuts** app. The scripts are installed to your home directory but won't show up in Finder — you'll type the path directly into the Shortcuts app.
 
 ### Shortcut 1: Raw Dictation
 
-1. Open **Shortcuts** and create a new shortcut
-2. Add action: **Run Shell Script**
-3. Set shell to `/bin/zsh`
-4. Set the script to: `/Users/YOUR_USERNAME/dictate.sh`
-5. Click the **ⓘ** button → Enable **Use as Quick Action**
-6. Assign keyboard shortcut: **Control + `**
+1. Open the **Shortcuts** app
+2. Click **+** to create a new shortcut
+3. Name it something like **Whisper Raw**
+4. In the search bar on the right, search for **Run Shell Script** and add it
+5. In the script text box, type: `/Users/YOUR_USERNAME/dictate.sh`
+   - Replace `YOUR_USERNAME` with your Mac username (e.g., `danielpetta`)
+   - The full path should look like: `/Users/danielpetta/dictate.sh`
+6. Set **Shell** to: `zsh`
+7. Leave Input, Pass Input, and Run as Administrator at their defaults
+8. Click the **ⓘ** (info) button at the top of the shortcut
+9. Enable **Use as Quick Action**
+10. Click **Add Keyboard Shortcut** and press **Control + `** (the backtick key, above Tab)
 
 ### Shortcut 2: Clean Dictation (with Apple Intelligence)
 
-1. Create a new shortcut
-2. Add action: **Run Shell Script**
-   - Set shell to `/bin/zsh`
-   - Script: `/Users/YOUR_USERNAME/dictate-clipboard.sh`
-3. Add action: **Get Clipboard**
-4. Add action: **Use Model** → select **On-Device**
-   - Set the prompt to: `Clean up this spoken text. Fix grammar, remove filler words, and make it concise. Do not change the meaning. Return only the cleaned text.`
-5. Add action: **Copy to Clipboard**
-6. Add action: **Paste**
-7. Click the **ⓘ** button → Enable **Use as Quick Action**
-8. Assign a keyboard shortcut (e.g., **F6**)
+This shortcut records your speech, transcribes it, then uses Apple Intelligence to clean up the text before pasting it.
+
+1. Click **+** to create a new shortcut
+2. Name it something like **Whisper Clean**
+3. Add these actions in order:
+
+**Action 1 — Run Shell Script:**
+- Search for **Run Shell Script** and add it
+- In the script text box, type: `/Users/YOUR_USERNAME/dictate-clipboard.sh`
+  - Replace `YOUR_USERNAME` with your Mac username
+- Set **Shell** to: `zsh`
+
+**Action 2 — Get Clipboard:**
+- Search for **Get Clipboard** and add it
+
+**Action 3 — Use Model:**
+- Search for **Use Model** and add it
+- Select **On-Device** (keeps everything local and private) or **Private Cloud Compute** (uses Apple's cloud)
+- In the prompt text box, type: `Clean up this spoken text. Fix grammar, remove filler words, and make it concise. Do not change the meaning. Return only the cleaned text.`
+
+**Action 4 — Copy to Clipboard:**
+- Search for **Copy to Clipboard** and add it
+- Make sure it's set to copy the **Response** from the Use Model step
+
+**Action 5 — Type the Result:**
+- Add another **Run Shell Script** action
+- In the script text box, type: `osascript -e 'tell application "System Events" to keystroke (the clipboard)'`
+- Set **Shell** to: `zsh`
+
+4. Click the **ⓘ** (info) button at the top of the shortcut
+5. Enable **Use as Quick Action**
+6. Click **Add Keyboard Shortcut** and press your preferred key (e.g., **F6**)
+
+> **Note:** If Control + Shift + ` doesn't work as a shortcut, use a function key like F6 instead. Some key combinations don't register in macOS Shortcuts.
 
 ## Permissions
 
@@ -74,6 +107,21 @@ macOS requires you to grant permissions the first time. Go to **System Settings 
 - **Microphone**: Terminal, Shortcuts
 
 macOS should prompt you automatically on first use — just click Allow.
+
+## Testing
+
+You can test the scripts directly from Terminal before setting up Shortcuts:
+
+**Test raw mode:**
+1. Open Notes (or any app with a text field) and click into it
+2. In Terminal, run: `~/dictate.sh`
+3. Speak a sentence, then either wait 7 seconds or open another Terminal tab and run `~/dictate.sh` again to stop
+4. The transcribed text should appear in your text field
+
+**Test clipboard mode:**
+1. In Terminal, run: `~/dictate-clipboard.sh`
+2. Speak a sentence, then wait for it to finish
+3. Open any text field and press Command + V — your transcribed text should paste
 
 ## Updating
 
@@ -93,7 +141,7 @@ git pull
 | Recording stops (manual or silence) | Pop | Transcription complete |
 | 30-second max reached | Funk | Time's up, but audio is still transcribed |
 
-To change sounds, edit the `SOUND_START`, `SOUND_DONE`, and `SOUND_TIMEOUT` variables in the scripts. Run `ls /System/Library/Sounds/` in Terminal to see all available sounds.
+To change sounds, edit the `SOUND_START`, `SOUND_DONE`, and `SOUND_TIMEOUT` variables in the scripts. Run `ls /System/Library/Sounds/` in Terminal to preview available sounds. You can listen to any sound with `afplay /System/Library/Sounds/Pop.aiff`.
 
 ## Troubleshooting
 
@@ -104,13 +152,19 @@ rm -f /tmp/dictate_pid /tmp/dictate_clipboard_pid
 ```
 
 **Text doesn't type into apps:**
-Check Accessibility permissions in System Settings.
+Check Accessibility permissions in System Settings → Privacy & Security → Accessibility. Make sure both Terminal and Shortcuts are listed and enabled.
 
 **Microphone not working:**
-Check Microphone permissions in System Settings.
+Check Microphone permissions in System Settings → Privacy & Security → Microphone.
 
-**Clean mode not working:**
-Make sure Apple Intelligence is enabled in System Settings → Apple Intelligence & Siri. Check that the Shortcut has all the actions in the right order (Run Shell Script → Get Clipboard → Use Model → Copy to Clipboard → Paste).
+**"No such file or directory" error in Shortcuts:**
+Make sure you've run `./setup.sh` first — this copies the scripts to your home directory. The path in the shortcut should be the full path, e.g., `/Users/danielpetta/dictate.sh` (not `~/dictate.sh`).
+
+**Clean mode shortcut not triggering:**
+Some key combinations don't work in macOS Shortcuts. Try using a function key (F5, F6, etc.) instead of modifier key combos.
+
+**Clean mode not cleaning up text:**
+Make sure Apple Intelligence is enabled in System Settings → Apple Intelligence & Siri. Check that the Shortcut has all the actions in the right order: Run Shell Script → Get Clipboard → Use Model → Copy to Clipboard → Run Shell Script (paste).
 
 ## Customization
 
@@ -133,4 +187,4 @@ rm -rf ~/whisper-dictation
 brew uninstall whisper-cpp sox
 ```
 
-Then delete the two Shortcuts from the Shortcuts app.
+Then delete the shortcuts from the Shortcuts app.
