@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Whisper Dictation — Raw Mode
-# Transcribes speech exactly as spoken
+# Transcribes speech exactly as spoken and types it into the active app
 # Stop: press shortcut again, 7s silence, or 30s max
 
 MODEL=~/whisper-models/ggml-base.en.bin
